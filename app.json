@@ -1,28 +1,23 @@
 {
   "expo": {
     "name": "ByteRush",
-    "slug": "ByteRush",
+    "slug": "byterush",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "icon": "./assets/imageness/logo.png",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/imageness/fondo.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "ios": {
-      "supportsTablet": true
+      "backgroundColor": "#0a0a0a"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/imagenes/logo.png",
+        "backgroundColor": "#0a0a0a"
       }
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/imagenes/logo.png"
     }
   }
 }
