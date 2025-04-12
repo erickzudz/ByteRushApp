@@ -1,31 +1,32 @@
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  Image,
   TouchableOpacity,
+  Image,
   ImageBackground,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useEffect, useState } from 'react';
+import * as Animatable from 'react-native-animatable';
+import { LinearGradient } from 'expo-linear-gradient';
+import { FontAwesome } from '@expo/vector-icons'; // 👈 Íconos
 
 const categorias = [
-  '⚙️ Lógica de programación',
+  '⚙️ Lógica',
   '🧠 Algoritmos',
   '🕸️ Redes',
-  '🧩 Bases de datos',
-  '🧮 Matemática computacional',
+  '🧩 BD',
+  '📐 Matemática',
 ];
 
 export default function InicioScreen() {
   const navigation = useNavigation();
-
-  const [categoriaActual, setCategoriaActual] = useState('');
+  const [categoria, setCategoria] = useState('');
 
   useEffect(() => {
-    // Elegir categoría aleatoria al montar
     const random = categorias[Math.floor(Math.random() * categorias.length)];
-    setCategoriaActual(random);
+    setCategoria(random);
   }, []);
 
   return (
@@ -35,73 +36,106 @@ export default function InicioScreen() {
       resizeMode="cover"
       imageStyle={{ backgroundColor: '#0a0a0a' }}
     >
-      <View style={styles.overlay}>
-        <Image
+      <View style={styles.container}>
+        {/* 💚 Vidas con icono */}
+        <View style={styles.lifeBadge}>
+          <FontAwesome name="heart" size={16} color="#00ff88" />
+          <Text style={styles.lifeText}> 3</Text>
+        </View>
+
+        {/* Botón perfil flotante */}
+        <TouchableOpacity
+          style={styles.profileButton}
+          onPress={() => navigation.navigate('Perfil' as never)}
+        >
+          <Image
+            source={require('../assets/imagenes/logo.png')}
+            style={styles.profileIcon}
+          />
+        </TouchableOpacity>
+
+        <Animatable.Image
+          animation="fadeInDown"
+          delay={300}
           source={require('../assets/imagenes/logo.png')}
-          style={styles.avatar}
+          style={styles.logo}
           resizeMode="contain"
         />
 
-        <Text style={styles.title}>¡Bienvenido, Desarrollador!</Text>
+        <Animatable.Text animation="fadeInUp" delay={700} style={styles.title}>
+          ¡Bienvenido, Desarrollador!
+        </Animatable.Text>
 
-        {/* Datos del jugador */}
-        <View style={styles.statsBox}>
-          <Text style={styles.statText}>🔥 Racha actual: <Text style={styles.bold}>3</Text></Text>
-          <Text style={styles.statText}>💰 Monedas: <Text style={styles.bold}>150</Text></Text>
-          <Text style={styles.statText}>🧠 Nivel: <Text style={styles.bold}>Intermedio</Text></Text>
-        </View>
+        <Animatable.View animation="fadeInUp" delay={1000} style={styles.statsBox}>
+          <Text style={styles.statText}>
+            🔥 Racha: <Text style={styles.bold}>3</Text>
+          </Text>
+          <Text style={styles.statText}>
+            💰 Monedas: <Text style={styles.bold}>150</Text>
+          </Text>
+          <Text style={styles.statText}>
+            🧠 Nivel: <Text style={styles.bold}>Intermedio</Text>
+          </Text>
+        </Animatable.View>
 
-        {/* Categoría aleatoria */}
         <Text style={styles.subtext}>Categoría seleccionada:</Text>
-        <Text style={styles.randomCategory}>{categoriaActual}</Text>
+        <Animatable.Text animation="pulse" iterationCount="infinite" style={styles.category}>
+          {categoria}
+        </Animatable.Text>
+        <Animatable.View animation="tada" iterationCount="infinite" style={styles.button}>
+          <TouchableOpacity onPress={() => navigation.navigate('Ruleta' as never)}>
+            <LinearGradient colors={['#00ff88', '#00cc66']} style={styles.gradientButton}>
+              <Text style={styles.buttonText}>🎮 ¡JUGAR!</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </Animatable.View>
 
-        {/* Botones */}
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate('Categoria' as never)}
-        >
-          <Text style={styles.buttonText}>🎮 Jugar</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.button, styles.secondaryButton]}
-          onPress={() => navigation.navigate('Perfil' as never)}
-        >
-          <Text style={styles.buttonText}>👤 Perfil</Text>
-        </TouchableOpacity>
       </View>
     </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  background: {
+  background: { flex: 1 },
+  container: {
     flex: 1,
-  },
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(10, 10, 10, 0.85)',
-    justifyContent: 'center',
+    justifyContent: 'space-evenly',
     alignItems: 'center',
     paddingHorizontal: 30,
+    paddingTop: 80,
+    paddingBottom: 40,
+    backgroundColor: 'rgba(10,10,10,0.3)',
   },
-  avatar: {
-    width: 120,
-    height: 120,
-    marginBottom: 20,
+  profileButton: {
+    position: 'absolute',
+    top: 50,
+    right: 30,
+    zIndex: 10,
+  },
+  profileIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: '#00ff88',
+  },
+  logo: {
+    width: 160,
+    height: 160,
+    marginBottom: 10,
   },
   title: {
-    color: '#00ff88',
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
+    color: '#00ff88',
+    marginBottom: 10,
     textAlign: 'center',
   },
   statsBox: {
     backgroundColor: '#1a1a1a',
     padding: 15,
     borderRadius: 10,
-    marginBottom: 20,
+    marginBottom: 10,
     width: '100%',
   },
   statText: {
@@ -115,31 +149,45 @@ const styles = StyleSheet.create({
   },
   subtext: {
     color: '#aaa',
-    marginTop: 10,
-    marginBottom: 5,
     fontSize: 14,
+    marginBottom: 6,
   },
-  randomCategory: {
+  category: {
     color: '#00ff88',
+    fontSize: 20,
     fontWeight: 'bold',
-    fontSize: 16,
-    marginBottom: 30,
+    marginBottom: 20,
   },
   button: {
-    backgroundColor: '#00ff88',
-    paddingVertical: 15,
-    paddingHorizontal: 60,
+    width: '100%',
     borderRadius: 12,
-    marginVertical: 10,
+    overflow: 'hidden',
   },
-  secondaryButton: {
-    backgroundColor: '#1a1a1a',
-    borderWidth: 1,
-    borderColor: '#00ff88',
+  gradientButton: {
+    paddingVertical: 15,
+    alignItems: 'center',
   },
   buttonText: {
     color: '#0a0a0a',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  // 💚 Badge de vidas con icono
+  lifeBadge: {
+    position: 'absolute',
+    top: 50,
+    left: 30,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 20,
+    zIndex: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  lifeText: {
+    color: '#00ff88',
+    fontWeight: 'bold',
+    marginLeft: 6,
   },
 });

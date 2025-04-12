@@ -12,6 +12,7 @@ import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import VerifyEmailScreen from '../screens/VerifyEmailScreen';
 import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
+import RuletaScreen from '../screens/RuletaScreen';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -20,9 +21,10 @@ export type RootStackParamList = {
   ForgotPassword: undefined;
   Inicio: undefined;
   Categoria: undefined;
-  Juego: undefined;
+  Juego: { categoria: string };
   Perfil: undefined;
   VerifyEmail: undefined;
+  Ruleta: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -39,9 +41,9 @@ export default function AppNavigator() {
       <Stack.Navigator
         screenOptions={{
           headerShown: false,
-          animation: 'fade', // 👈 transición suave
+          animation: 'fade',
           contentStyle: {
-            backgroundColor: '#0a0a0a', // 👈 fondo para evitar parpadeos blancos
+            backgroundColor: '#0a0a0a',
           },
         }}
       >
@@ -54,6 +56,7 @@ export default function AppNavigator() {
         <Stack.Screen name="Categoria" component={CategoriaScreen} />
         <Stack.Screen name="Juego" component={JuegoScreen} />
         <Stack.Screen name="Perfil" component={PerfilScreen} />
+        <Stack.Screen name="Ruleta" component={RuletaScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
