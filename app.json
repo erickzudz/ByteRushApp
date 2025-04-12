@@ -11,6 +11,7 @@
       "backgroundColor": "#0a0a0a"
     },
     "android": {
+      "package": "com.byterush.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/imagenes/logo.png",
         "backgroundColor": "#0a0a0a"

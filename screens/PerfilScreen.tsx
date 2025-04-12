@@ -1,22 +1,90 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
+  TouchableOpacity,
   Image,
   TextInput,
-  TouchableOpacity,
   ImageBackground,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { auth, db } from '../firebase/firebaseConfig';
+import {
+  doc,
+  getDoc,
+  updateDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+} from 'firebase/firestore';
+import Toast from 'react-native-toast-message';
 
 export default function PerfilScreen() {
-  const [nombreUsuario, setNombreUsuario] = useState('Player001');
-  const [nuevoNombre, setNuevoNombre] = useState(nombreUsuario);
+  const navigation = useNavigation();
+  const [nickname, setNickname] = useState('');
+  const [nuevoNombre, setNuevoNombre] = useState('');
 
-  const handleGuardar = () => {
-    // Aquí iría lógica para guardar en Firebase
-    setNombreUsuario(nuevoNombre);
+  useEffect(() => {
+    const cargarNickname = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const ref = doc(db, 'usuarios', user.uid);
+      const snap = await getDoc(ref);
+      if (snap.exists()) {
+        const data = snap.data();
+        setNickname(data.nickname || '');
+        setNuevoNombre(data.nickname || '');
+      }
+    };
+
+    cargarNickname();
+  }, []);
+
+  const handleGuardar = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const nombreLimpio = nuevoNombre.trim();
+    const regex = /^[a-zA-Z0-9_]{3,}$/;
+
+    if (!nombreLimpio) {
+      Toast.show({ type: 'error', text1: 'El nombre no puede estar vacío' });
+      return;
+    }
+
+    if (!regex.test(nombreLimpio)) {
+      Toast.show({
+        type: 'error',
+        text1: 'Solo letras, números o _ y mínimo 3 caracteres',
+      });
+      return;
+    }
+
+    if (nombreLimpio === nickname) return;
+
+    try {
+      const q = query(collection(db, 'usuarios'), where('nickname', '==', nombreLimpio));
+      const result = await getDocs(q);
+      const nicknameOcupado = result.docs.some((doc) => doc.id !== user.uid);
+
+      if (nicknameOcupado) {
+        Toast.show({ type: 'error', text1: 'Este nombre ya está en uso' });
+        return;
+      }
+
+      await updateDoc(doc(db, 'usuarios', user.uid), {
+        nickname: nombreLimpio,
+      });
+
+      setNickname(nombreLimpio);
+      Toast.show({ type: 'success', text1: 'Nombre actualizado' });
+    } catch (error) {
+      Toast.show({ type: 'error', text1: 'Error al guardar el nombre' });
+    }
   };
 
   return (
@@ -26,9 +94,16 @@ export default function PerfilScreen() {
       resizeMode="cover"
       imageStyle={{ opacity: 1 }}
     >
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => navigation.goBack()}
+      >
+        <Ionicons name="arrow-back" size={24} color="#00ff88" />
+      </TouchableOpacity>
+
       <View style={styles.profileBox}>
         <Image
-          source={require('../assets/imagenes/logo.png')} // Avatar por defecto
+          source={require('../assets/imagenes/logo.png')}
           style={styles.avatar}
         />
 
@@ -43,21 +118,6 @@ export default function PerfilScreen() {
         <TouchableOpacity style={styles.saveButton} onPress={handleGuardar}>
           <Text style={styles.saveText}>Guardar cambios</Text>
         </TouchableOpacity>
-
-        <View style={styles.statsRow}>
-          <View style={styles.statBox}>
-            <Text style={styles.statLabel}>🔥 Racha</Text>
-            <Text style={styles.statValue}>3</Text>
-          </View>
-          <View style={styles.statBox}>
-            <Text style={styles.statLabel}>🧠 Nivel</Text>
-            <Text style={styles.statValue}>Intermedio</Text>
-          </View>
-          <View style={styles.statBox}>
-            <Text style={styles.statLabel}>💰 Monedas</Text>
-            <Text style={styles.statValue}>150</Text>
-          </View>
-        </View>
 
         <TouchableOpacity style={styles.logoutButton} onPress={() => console.log('Cerrar sesión')}>
           <Ionicons name="log-out-outline" size={20} color="#0a0a0a" />
@@ -74,6 +134,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#0a0a0a',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: 30,
+    zIndex: 10,
   },
   profileBox: {
     backgroundColor: 'rgba(10,10,10,0.85)',
@@ -115,30 +181,6 @@ const styles = StyleSheet.create({
   saveText: {
     color: '#0a0a0a',
     fontWeight: 'bold',
-  },
-  statsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-    marginBottom: 30,
-  },
-  statBox: {
-    backgroundColor: '#1a1a1a',
-    padding: 12,
-    borderRadius: 10,
-    alignItems: 'center',
-    flex: 1,
-    marginHorizontal: 4,
-  },
-  statLabel: {
-    color: '#ccc',
-    fontSize: 12,
-    marginBottom: 4,
-  },
-  statValue: {
-    color: '#00ff88',
-    fontWeight: 'bold',
-    fontSize: 14,
   },
   logoutButton: {
     flexDirection: 'row',

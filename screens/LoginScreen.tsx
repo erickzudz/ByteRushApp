@@ -12,11 +12,48 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useState } from 'react';
+import Toast from 'react-native-toast-message';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebase/firebaseConfig';
 
 export default function LoginScreen() {
   const navigation = useNavigation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Toast.show({
+        type: 'error',
+        text1: 'Por favor, completa todos los campos.'
+      });
+      return;
+    }
+
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      if (!user.emailVerified) {
+        Toast.show({
+          type: 'error',
+          text1: 'Verifica tu correo antes de iniciar sesión.'
+        });
+        return;
+      }
+
+      Toast.show({
+        type: 'success',
+        text1: 'Inicio de sesión exitoso'
+      });
+      navigation.navigate('Inicio' as never);
+    } catch (error: any) {
+      Toast.show({
+        type: 'error',
+        text1: 'Correo o contraseña incorrectos'
+      });
+    }
+  };
 
   return (
     <ImageBackground
@@ -55,10 +92,9 @@ export default function LoginScreen() {
             secureTextEntry
           />
 
-          <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Inicio' as never)}>
+          <TouchableOpacity style={styles.button} onPress={handleLogin}>
             <Text style={styles.buttonText}>Iniciar sesión</Text>
           </TouchableOpacity>
-
 
           <TouchableOpacity onPress={() => navigation.navigate('Register' as never)}>
             <Text style={styles.linkText}>
@@ -78,14 +114,14 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-    backgroundColor: '#0a0a0a', // 👈 fondo de respaldo para evitar flash blanco
+    backgroundColor: '#0a0a0a',
   },
   keyboardAvoiding: {
     flex: 1,
   },
   overlay: {
     flexGrow: 1,
-    backgroundColor: 'rgba(10, 10, 10, 0.85)', // 👈 capa oscura
+    backgroundColor: 'rgba(10, 10, 10, 0.85)',
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 30,
