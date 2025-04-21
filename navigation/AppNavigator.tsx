@@ -13,6 +13,7 @@ import RegisterScreen from '../screens/RegisterScreen';
 import VerifyEmailScreen from '../screens/VerifyEmailScreen';
 import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
 import RuletaScreen from '../screens/RuletaScreen';
+import SubirPreguntas from '../screens/SubirPreguntas';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -47,6 +48,7 @@ export default function AppNavigator() {
           },
         }}
       >
+  
         <Stack.Screen name="Splash" component={SplashWrapper} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />

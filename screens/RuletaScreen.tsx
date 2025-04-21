@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,7 @@ import {
   ImageBackground,
 } from 'react-native';
 import Svg, { G, Path, Text as SvgText } from 'react-native-svg';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 
@@ -21,29 +21,46 @@ const colors = ['#00ff88', '#00cc66', '#009966', '#00b386', '#00e699'];
 
 export default function RuletaScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const [selected, setSelected] = useState<string | null>(null);
+  const route = useRoute();
+  const reinicio = (route.params as any)?.reinicio ?? false;
+
   const rotateAnim = useRef(new Animated.Value(0)).current;
 
   const spin = () => {
     const spins = 5 + Math.floor(Math.random() * 3);
     const segmentAngle = 360 / categorias.length;
-    const selectedIndex = Math.floor(Math.random() * categorias.length);
-    const finalAngle = spins * 360 + selectedIndex * segmentAngle + segmentAngle / 2;
+    const randomExtraAngle = Math.random() * 360;
+    const finalAngle = spins * 360 + randomExtraAngle;
 
     Animated.timing(rotateAnim, {
       toValue: finalAngle,
       duration: 4000,
       useNativeDriver: true,
     }).start(() => {
-      setSelected(categorias[selectedIndex]);
+      const normalizedAngle = (finalAngle - 90 + 360) % 360;
+      const selectedIndex = Math.floor(normalizedAngle / segmentAngle);
+      const categoriaSeleccionada = categorias[selectedIndex];
+
+      // 🧪 Logs para verificar funcionamiento
+      console.log('🌀 Ángulo final:', finalAngle.toFixed(2));
+      console.log('🎯 Ángulo corregido (flecha arriba):', normalizedAngle.toFixed(2));
+      console.log('📍 Categoría seleccionada:', categoriaSeleccionada);
+
       setTimeout(() => {
-        navigation.navigate('Juego', { categoria: categorias[selectedIndex] });
+        navigation.replace('Juego', { categoria: categoriaSeleccionada } as never);
       }, 1000);
     });
   };
 
   useEffect(() => {
-    spin();
+    rotateAnim.setValue(0);
+    const delay = reinicio ? 500 : 0;
+
+    const timeout = setTimeout(() => {
+      spin();
+    }, delay);
+
+    return () => clearTimeout(timeout);
   }, []);
 
   const renderSlices = () => {
@@ -59,10 +76,8 @@ export default function RuletaScreen() {
 
       const path = `M${radius},${radius} L${x1},${y1} A${radius},${radius} 0 ${largeArc},1 ${x2},${y2} Z`;
 
-      // Calcular ángulo del texto para rotarlo en dirección de lectura
       const midAngle = startAngle + angle / 2;
-      const rotate = midAngle + 90; // sumar 90 grados para apuntar hacia abajo
-
+      const rotate = midAngle + 90;
       const textX = radius + radius * 0.6 * Math.cos((midAngle * Math.PI) / 180);
       const textY = radius + radius * 0.6 * Math.sin((midAngle * Math.PI) / 180);
 
